@@ -13,7 +13,8 @@ buildscript {
   dependencies {
     classpath(
         "no.skatteetaten.aurora.gradle.plugins:aurora-gradle-plugin:1.1.0",
-        "no.skatteetaten.aurora.gradle.plugins:aurora-docker-plugin:1.0.1"
+        "no.skatteetaten.aurora.gradle.plugins:aurora-docker-plugin:1.0.1",
+        "org.ajoberstar:grgit:1.1.0"
     )
   }
 }
@@ -30,8 +31,13 @@ ext.aurora = [
     applyNexusRepositories: false
 ]
 
+ext {
+    git = org.ajoberstar.grgit.Grgit.open(file('.'))
+
+    revision = git.head().id
+}
+
 apply plugin: 'base'
-apply plugin: 'no.skatteetaten.plugins.aurora'
 apply plugin: 'no.skatteetaten.plugins.aurora-docker'
 
 auroradocker {
