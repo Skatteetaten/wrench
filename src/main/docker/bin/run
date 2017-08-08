@@ -1,0 +1,18 @@
+#!/bin/bash
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source $DIR/container-limits
+
+export JAVA_OPTS=$($DIR/java-options)
+
+cd application
+echo "Starting application in $(pwd)... $(date)"
+
+# We set a trap on TERM so we can have code running after the child has terminated. OpenShift gives an
+# error on a non-zero exit code, and the JVM exits with 143 when sent at SIGTERM
+# This construct depends on an init-system like dumb-init that signals all processes in the session. If the JVM
+# is not signaled, it will not exit, the trap will not run, and everything will hang...
+# trap 'exit 0' TERM
+## TODO: Check if pm2-docker fix all the nitty gritty stuff..
+# We run the script explicitly through bash to allow shebang lines of the form #!/usr/bin/env bash -eu
+pm2-docker $MAIN_JAVASCRIPT_FILE

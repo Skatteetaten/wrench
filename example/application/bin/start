@@ -1,0 +1,4 @@
+#/bin/bash
+
+env
+java $JAVA_OPTS -version

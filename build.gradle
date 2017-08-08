@@ -1,0 +1,92 @@
+import java.text.SimpleDateFormat
+import java.util.Date
+import no.skatteetaten.aurora.gradle.plugins.docker.DockerTools
+import no.skatteetaten.aurora.gradle.plugins.docker.ProcessTools
+import java.io.*
+
+buildscript {
+  repositories {
+    mavenCentral()
+    jcenter()
+    mavenLocal()
+  }
+  dependencies {
+    classpath(
+        "no.skatteetaten.aurora.gradle.plugins:aurora-gradle-plugin:1.1.0",
+        "no.skatteetaten.aurora.gradle.plugins:aurora-docker-plugin:1.0.1"
+    )
+  }
+}
+
+repositories {
+  mavenCentral()
+  jcenter()
+  mavenLocal()
+}
+
+
+ext.aurora = [
+    requireStaging: false,
+    applyNexusRepositories: false
+]
+
+apply plugin: 'base'
+apply plugin: 'no.skatteetaten.plugins.aurora'
+apply plugin: 'no.skatteetaten.plugins.aurora-docker'
+
+auroradocker {
+  imageName = 'aurora/wrench'
+  workingDir = "src/main/docker"
+  buildArgs = [
+      baseImageVersion: version
+  ]
+}
+
+
+task tagTestImage() {
+  dependsOn buildImage
+  doLast {
+    println "Tag test build image for testing"
+
+    String cmd = """docker tag aurora/wrench:$version aurora/wrench:testing"""
+
+    println cmd
+    ProcessTools.Result result = ProcessTools.runCommand(cmd)
+    if (result.process.exitValue() != 0) {
+      throw new GradleException("Image build failed. Inspect output.")
+    }
+    ext.imageId = DockerTools.getImageIdFromOutput(result.output)
+  }
+}
+
+task testImage() {
+  dependsOn tagTestImage
+  doLast {
+    println "Build example image"
+
+    String cmd = """docker build example"""
+
+    println cmd
+    ProcessTools.Result result = ProcessTools.runCommand(cmd)
+    if (result.process.exitValue() != 0) {
+      throw new GradleException("Image build failed. Inspect output.")
+    }
+    ext.imageId = DockerTools.getImageIdFromOutput(result.output)
+  }
+}
+
+
+task testOutputImage() {
+  dependsOn testImage
+  doLast {
+    ProcessTools.Result result = ProcessTools.runCommand("""docker run -m 512m --memory-swap -1 --cpu-period=100000 --cpu-quota=150000 -i $testImage.imageId""")
+    if (result.process.exitValue() != 0) {
+      throw new GradleException("Unable to run image. Inspect output for details.")
+    }
+    assert result.output.contains("JAVA_OPTS=-Xmx410m -XX:ParallelGCThreads=2 -XX:ConcGCThreads=2 -Djava.util.concurrent.ForkJoinPool.common.parallelism=2")
+  }
+}
+
+task wrapper(type: Wrapper) {
+  gradleVersion = "3.4"
+}
