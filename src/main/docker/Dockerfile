@@ -3,7 +3,7 @@ ARG baseImageVersion
 
 MAINTAINER The Norwegian Tax Administration <utvpaas@skatteetaten.no>
 
-LABEL version=${BASE_IMAGE_VERSION}
+LABEL version=${baseImageVersion}
 
 ENV LANG=C.UTF-8 \
     HOME=/u01 \

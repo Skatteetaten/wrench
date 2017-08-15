@@ -33,16 +33,17 @@ ext.aurora = [
 
 ext {
     git = org.ajoberstar.grgit.Grgit.open(file('.'))
-
     revision = git.head().id
 }
 
 apply plugin: 'base'
 apply plugin: 'no.skatteetaten.plugins.aurora-docker'
+apply plugin: 'no.skatteetaten.plugins.aurora'
 
 auroradocker {
   imageName = 'aurora/wrench'
   workingDir = "src/main/docker"
+  registry = "uil0paas-utv-registry01.skead.no:5000"
   buildArgs = [
       baseImageVersion: version
   ]
