@@ -22,11 +22,18 @@ WORKDIR /u01
 RUN mkdir -p /u01 && \
     mkdir -p /var/cache/nginx && \
     mkdir -p /run/nginx && \
+	chmod 777 /run/nginx && \
     chmod 777 /var/cache/nginx && \
-    chmod 777 /var/run
+    chmod 777 /var/run && \
+    chmod -R 777 /var/lib/nginx && \
+    chmod -R 777 /var/tmp/nginx && \
+    chmod -R 777 /var/log/nginx
 
 COPY bin/liveness.sh /u01/application/bin/liveness.sh
 COPY bin/readiness.sh /u01/application/bin/readiness.sh
 COPY bin/run_node /u01/bin/run_node
 COPY bin/run_nginx /u01/bin/run_nginx
-RUN chmod 755 /u01/bin/run_node /u01/bin/run_nginx && mkdir /u01/.pm2 && chmod 777 /u01/.pm2
+RUN chmod 755 /u01/bin/run_node && \
+    chmod 755 /u01/bin/run_nginx && \
+    mkdir /u01/.pm2 && \
+    chmod 777 /u01/.pm2

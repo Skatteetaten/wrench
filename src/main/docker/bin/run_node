@@ -1,9 +1,4 @@
-#!/bin/bash
-
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-source $DIR/container-limits
-
-export JAVA_OPTS=$($DIR/java-options)
+#!/bin/sh
 
 cd application
 echo "Starting application in $(pwd)... $(date)"
