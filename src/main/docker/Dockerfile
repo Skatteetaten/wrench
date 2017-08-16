@@ -1,4 +1,4 @@
-FROM node:boron
+FROM node:8-alpine
 ARG baseImageVersion
 
 MAINTAINER The Norwegian Tax Administration <utvpaas@skatteetaten.no>
@@ -10,13 +10,23 @@ ENV LANG=C.UTF-8 \
     BASE_IMAGE_VERSION=${baseImageVersion}
 ENV NODE_TLS_REJECT_UNAUTHORIZED=0
 RUN mkdir $HOME && \
+    apk update && \
+    apk add nginx && \
+    rm /var/cache/apk/* && \
     npm config set strict-ssl false && \
     npm config set registry http://aurora/npm/repository/npm-all/ && \
     npm install -g pm2
 
 WORKDIR /u01
+#TODO: Check if we can make more restrictive permissions..... Nginx need this
+RUN mkdir -p /u01 && \
+    mkdir -p /var/cache/nginx && \
+    mkdir -p /run/nginx && \
+    chmod 777 /var/cache/nginx && \
+    chmod 777 /var/run
 
 COPY bin/liveness.sh /u01/application/bin/liveness.sh
 COPY bin/readiness.sh /u01/application/bin/readiness.sh
-COPY bin/run /u01/bin/run
-RUN chmod 755 /u01/bin/run && mkdir /u01/.pm2 && chmod 777 /u01/.pm2
+COPY bin/run_node /u01/bin/run_node
+COPY bin/run_nginx /u01/bin/run_nginx
+RUN chmod 755 /u01/bin/run_node /u01/bin/run_nginx && mkdir /u01/.pm2 && chmod 777 /u01/.pm2
