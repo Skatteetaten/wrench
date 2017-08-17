@@ -19,10 +19,10 @@ RUN mkdir $HOME && \
 
 WORKDIR /u01
 #TODO: Check if we can make more restrictive permissions..... Nginx need this
-RUN mkdir -p /u01 && \
+RUN mkdir -p /u01/certs && \
     mkdir -p /var/cache/nginx && \
     mkdir -p /run/nginx && \
-	chmod 777 /run/nginx && \
+    chmod 777 /run/nginx && \
     chmod 777 /var/cache/nginx && \
     chmod 777 /var/run && \
     chmod -R 777 /var/lib/nginx && \
@@ -33,7 +33,12 @@ COPY bin/liveness.sh /u01/application/bin/liveness.sh
 COPY bin/readiness.sh /u01/application/bin/readiness.sh
 COPY bin/run_node /u01/bin/run_node
 COPY bin/run_nginx /u01/bin/run_nginx
-RUN chmod 755 /u01/bin/run_node && \
+COPY certs/* /u01/certs
+ENV NODE_EXTRA_CA_CERTS=/u01/certs/bundle.pem \
+    NODE_TLS_REJECT_UNAUTHORIZED=1
+
+RUN cat /u01/certs/* > /u01/certs/bundle.pem && \
+    chmod 755 /u01/bin/run_node && \
     chmod 755 /u01/bin/run_nginx && \
     mkdir /u01/.pm2 && \
     chmod 777 /u01/.pm2
