@@ -1,3 +1,3 @@
-FROM aurora/wingnut:testing
+FROM aurora/wrench:testing
 
-ADD application $HOME/application
+CMD ["/bin/true"]

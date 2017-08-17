@@ -90,7 +90,6 @@ task testOutputImage() {
     if (result.process.exitValue() != 0) {
       throw new GradleException("Unable to run image. Inspect output for details.")
     }
-    assert result.output.contains("JAVA_OPTS=-Xmx410m -XX:ParallelGCThreads=2 -XX:ConcGCThreads=2 -Djava.util.concurrent.ForkJoinPool.common.parallelism=2")
   }
 }
 
