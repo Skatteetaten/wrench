@@ -43,7 +43,7 @@ apply plugin: 'no.skatteetaten.plugins.aurora'
 auroradocker {
   imageName = 'aurora/wrench'
   workingDir = "src/main/docker"
-  registry = "uil0paas-utv-registry01.skead.no:5000"
+  registry = System.getProperty("registry") ?: "uil0paas-utv-registry01.skead.no:5000"
   buildArgs = [
       baseImageVersion: version
   ]
