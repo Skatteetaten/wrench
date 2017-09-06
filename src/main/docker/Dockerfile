@@ -12,6 +12,7 @@ ENV NODE_TLS_REJECT_UNAUTHORIZED=0
 RUN mkdir $HOME && \
     apk update && \
     apk add nginx && \
+    apk add bash && \
     rm /var/cache/apk/* && \
     npm config set strict-ssl false && \
     npm config set registry http://aurora/npm/repository/npm-all/ && \
