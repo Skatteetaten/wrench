@@ -13,5 +13,5 @@ node {
 
   stage 'Bygg OpenShift-image'
   def commitId = git.getCommitId()
-  openshift.buildImage('wrench', commitId)
+  openshift.buildImageWithCredentials('wrench', commitId, "github")
 }
