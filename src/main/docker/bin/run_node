@@ -10,4 +10,4 @@ echo "Starting application in $(pwd)... $(date)"
 # trap 'exit 0' TERM
 ## TODO: Check if pm2-docker fix all the nitty gritty stuff..
 # We run the script explicitly through bash to allow shebang lines of the form #!/usr/bin/env bash -eu
-pm2-docker $MAIN_JAVASCRIPT_FILE
+pm2-docker --raw $MAIN_JAVASCRIPT_FILE
