@@ -14,6 +14,7 @@ RUN mkdir $HOME && \
     apk update && \
     apk add nginx && \
     apk add bash && \
+    apk add gettext && \
     rm /var/cache/apk/* && \
     npm config set strict-ssl false && \
     npm config set registry http://aurora/npm/repository/npm-all/ && \
@@ -43,4 +44,6 @@ RUN cat /u01/certs/* > /u01/certs/bundle.pem && \
     chmod 755 /u01/bin/run_node && \
     chmod 755 /u01/bin/run_nginx && \
     mkdir /u01/.pm2 && \
-    chmod 777 /u01/.pm2
+    chmod 777 /u01/.pm2 && \
+    chmod 666 /etc/nginx/nginx.conf
+
