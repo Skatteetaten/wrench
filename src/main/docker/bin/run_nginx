@@ -1,10 +1,5 @@
 #!/bin/sh
-if [[ -z "${NO_PROCESSING}" ]]
-then
-   PROCESSED_CONF=$(mktemp)
-   envsubst < /etc/nginx/nginx.conf > $PROCESSED_CONF && \
-   mv $PROCESSED_CONF /etc/nginx/nginx.conf && \
-   exec nginx -g 'daemon off;'
-else
-   exec nginx -g "daemon off;"
-fi
+PROCESSED_CONF=$(mktemp)
+envsubst < /etc/nginx/nginx.conf > $PROCESSED_CONF && \
+mv $PROCESSED_CONF /etc/nginx/nginx.conf && \
+exec nginx -g 'daemon off;'
