@@ -1,5 +1,5 @@
 #!/bin/sh
 PROCESSED_CONF=$(mktemp)
-envsubst < /etc/nginx/nginx.conf > $PROCESSED_CONF && \
+envsubst '${PROXY_PASS_HOST}${PROXY_PASS_PORT}' < /etc/nginx/nginx.conf > $PROCESSED_CONF && \
 mv $PROCESSED_CONF /etc/nginx/nginx.conf && \
 exec nginx -g 'daemon off;'
