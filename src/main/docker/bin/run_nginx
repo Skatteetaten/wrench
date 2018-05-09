@@ -2,4 +2,5 @@
 PROCESSED_CONF=$(mktemp)
 envsubst '${PROXY_PASS_HOST}${PROXY_PASS_PORT}' < /etc/nginx/nginx.conf > $PROCESSED_CONF && \
 mv $PROCESSED_CONF /etc/nginx/nginx.conf && \
-exec nginx -g 'daemon off;'
+#exec nginx -g 'daemon off;'
+exec /usr/local/openresty/bin/openresty -g 'daemon off;'
