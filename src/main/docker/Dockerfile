@@ -50,8 +50,10 @@ ARG _RESTY_CONFIG_DEPS="--with-openssl=/tmp/openssl-${RESTY_OPENSSL_VERSION} --w
 # 1) Install apk dependencies
 # 2) Download and untar OpenSSL, PCRE, and OpenResty
 # 3) Build OpenResty
-# 4) Cleanup
+# 4) Install OpenIDC Lua package with depencies
+# 5) Cleanup
 
+RUN apk update
 RUN apk add --no-cache --virtual .build-deps \
         build-base \
         curl \
@@ -63,6 +65,12 @@ RUN apk add --no-cache --virtual .build-deps \
         perl-dev \
         readline-dev \
         zlib-dev \
+        alpine-sdk \
+        lua5.1 \
+        lua5.1-dev \
+        openssl-dev \
+        git \
+        luarocks5.1 \
     && apk add --no-cache \
         gd \
         geoip \
@@ -79,50 +87,32 @@ RUN apk add --no-cache --virtual .build-deps \
     && cd /tmp/openresty-${RESTY_VERSION} \
     && ./configure -j${RESTY_J} ${_RESTY_CONFIG_DEPS} ${RESTY_CONFIG_OPTIONS} ${RESTY_CONFIG_OPTIONS_MORE} \
     && make -j${RESTY_J} \
-    && make -j${RESTY_J} install \
-    && cd /tmp \
-    && rm -rf \
-        openssl-${RESTY_OPENSSL_VERSION} \
-        openssl-${RESTY_OPENSSL_VERSION}.tar.gz \
-        openresty-${RESTY_VERSION}.tar.gz openresty-${RESTY_VERSION} \
-        pcre-${RESTY_PCRE_VERSION}.tar.gz pcre-${RESTY_PCRE_VERSION} \
-    && apk del .build-deps \
-    && ln -sf /dev/stdout /usr/local/openresty/nginx/logs/access.log \
-    && ln -sf /dev/stderr /usr/local/openresty/nginx/logs/error.log
+    && make -j${RESTY_J} install 
 
 # Add additional binaries into PATH for convenience
 ENV PATH=$PATH:/usr/local/openresty/luajit/bin:/usr/local/openresty/nginx/sbin:/usr/local/openresty/bin
 
 # lua-resty-openidc installation - including deps
-RUN apk update
-RUN apk add \
-        alpine-sdk \
-        lua5.1 \
-        lua5.1-dev \
-        openssl \
-        openssl-dev \
-        gcc \
-        curl \
-        git
-
 RUN git config --global url."https://".insteadOf git://
-RUN apk add \
-        luarocks5.1 
-
-RUN cd /usr/bin 
-RUN luarocks-5.1 install lua-resty-http 
-RUN luarocks-5.1 install lua-resty-session 
-RUN luarocks-5.1 install lua-resty-jwt \
+RUN luarocks-5.1 install lua-resty-http \
+    &&  luarocks-5.1 install lua-resty-session \
+    &&  luarocks-5.1 install lua-resty-jwt \
     &&  luarocks-5.1 install luacrypto \
     &&  luarocks-5.1 install lua-resty-hmac \
     &&  luarocks-5.1 install lua-resty-openidc
 
+#Not sure why this is necessary.. 
+RUN mkdir -p /etc/nginx
+RUN touch /etc/nginx/nginx.conf
 
-# Copy nginx configuration files
-COPY nginx.conf /usr/local/openresty/nginx/conf/nginx.conf
-COPY nginx.vh.default.conf /etc/nginx/conf.d/default.conf
-
-#CMD ["/usr/local/openresty/bin/openresty", "-g", "daemon off;"]
+#Clean up build dependencies -- TODO: deletes too much. Not sure what. Lua?
+# RUN cd /tmp \
+#     && rm -rf \
+#         openssl-${RESTY_OPENSSL_VERSION} \
+#         openssl-${RESTY_OPENSSL_VERSION}.tar.gz \
+#         openresty-${RESTY_VERSION}.tar.gz openresty-${RESTY_VERSION} \
+#         pcre-${RESTY_PCRE_VERSION}.tar.gz pcre-${RESTY_PCRE_VERSION} \
+#     && apk del .build-deps 
 
 
 ENV LANG=C.UTF-8 \
@@ -145,11 +135,9 @@ RUN mkdir -p /u01/certs && \
     mkdir -p /run/nginx && \
     chmod 777 /run/nginx && \
     chmod 777 /var/cache/nginx && \
-    chmod 777 /var/run 
-    # && \
-    # chmod -R 777 /var/lib/nginx && \
-    # chmod -R 777 /var/tmp/nginx && \
-    # chmod -R 777 /var/log/nginx
+    chmod 777 /var/run && \
+    chmod 777 /usr/local/openresty/nginx && \
+    chmod 777 /usr/local/openresty/nginx/logs
 
 COPY bin/liveness.sh /u01/application/bin/liveness.sh
 COPY bin/readiness.sh /u01/application/bin/readiness.sh
@@ -164,6 +152,4 @@ RUN cat /u01/certs/* > /u01/certs/bundle.pem && \
     chmod 755 /u01/bin/run_nginx && \
     mkdir /u01/.pm2 && \
     chmod 777 /u01/.pm2 
-    # && \
-    # chmod 666 /etc/nginx/nginx.conf
 
