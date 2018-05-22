@@ -1,4 +1,4 @@
-FROM aurora/turbo:feature_ATO_172_Turbo-SNAPSHOT
+FROM aurora/turbo:0.0.1
 
 ARG baseImageVersion
 
@@ -14,6 +14,7 @@ WORKDIR ${HOME}
 RUN microdnf install --nodocs gettext \
       nginx \
       nodejs  && \
+    microdnf clean all && \
     npm config set strict-ssl false && \
     npm config set registry http://aurora/npm/repository/npm-all/ && \
     npm install -g pm2 && \
