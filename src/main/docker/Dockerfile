@@ -1,4 +1,4 @@
-FROM aurora/turbo:feature_ATO_172_Turbo-SNAPSHOT
+FROM aurora/turbo:0.0.1
 
 ARG baseImageVersion
 
