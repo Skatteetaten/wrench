@@ -1,4 +1,4 @@
-FROM aurora/turbo:0.0.1
+FROM aurora/turbo:feature_ATO_172_Turbo-SNAPSHOT
 
 ARG baseImageVersion
 
@@ -33,7 +33,7 @@ COPY bin/liveness.sh /u01/application/bin/liveness.sh
 COPY bin/readiness.sh /u01/application/bin/readiness.sh
 COPY bin/run_node /u01/bin/run_node
 COPY bin/run_nginx /u01/bin/run_nginx
-COPY certs/* /u01/certs
+COPY certs/ /u01/certs
 
 ENV NODE_EXTRA_CA_CERTS=/u01/certs/bundle.pem \
     NODE_TLS_REJECT_UNAUTHORIZED=1
